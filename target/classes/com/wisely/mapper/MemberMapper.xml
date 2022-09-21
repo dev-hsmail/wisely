@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wisely.mapper.MemberMapper">
+
+	<insert id="join" parameterType="com.wisely.domain.MemberVO">	
+		INSERT INTO TBL_MB
+			(MB_EML, MB_PW, MB_PN, MB_BRH, MB_NM, MB_GEN, MB_NTFC_RCV, MB_ADDR, MB_ADDR_DTL)
+		VALUES
+			(#{mb_eml}, #{mb_pw}, #{mb_pn}, #{mb_brh}, #{mb_nm}, #{mb_gen}, #{mb_ntfc_rcv}, #{mb_addr}, #{mb_addr_dtl})	
+	</insert>
+	
+	<select id="login_ok" parameterType="com.wisely.dto.LoginDTO" resultType="com.wisely.domain.MemberVO">		
+		SELECT
+			MB_EML, MB_NM, MB_PW, MB_ADDR, MB_ADDR_DTL, MB_PN, MB_NTFC_RCV
+		FROM
+			TBL_MB
+		WHERE
+			MB_EML = #{mb_eml}	<!-- AND MB_PW = #{mb_pw} -->		
+	</select>
+
+	<select id="searchEML" resultType="string">
+	
+		SELECT 
+			MB_EML
+		FROM 
+			TBL_MB
+		WHERE 
+			MB_BRH = #{mb_brh} AND MB_PN = #{mb_pn}
+		
+	</select>
+	
+	<select id="getEmailExists" resultType="string">
+	
+		SELECT 
+			MB_EML
+		FROM 
+			TBL_MB
+		WHERE 
+			MB_EML = #{mb_eml}
+
+	</select>
+	
+	<update id="changePW">
+	
+		UPDATE
+			TBL_MB
+		SET 
+			MB_PW = #{mb_pw}
+		WHERE
+			MB_EML = #{mb_eml}
+	
+	</update>
+
+	<update id="modify" parameterType="com.wisely.domain.MemberVO">
+	
+		UPDATE
+			TBL_MB
+		SET
+			MB_EML = #{mb_eml}, 
+			MB_PW = #{mb_pw}, 
+			MB_PN = #{mb_pn}, 
+			MB_BRH = #{mb_brh}, 
+			MB_NM = #{mb_nm}, 
+			MB_GEN = #{mb_gen}, 
+			MB_ADDR = #{mb_addr}, 
+			MB_ADDR_DTL = #{mb_addr_dtl}
+		WHERE
+			MB_EML = #{mb_eml}
+	
+	</update>
+
+</mapper>

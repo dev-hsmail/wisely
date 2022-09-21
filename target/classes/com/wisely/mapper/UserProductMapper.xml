@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wisely.mapper.UserProductMapper">
+
+	<select id="getCategoryList" resultType="com.wisely.domain.CategoryVO">
+	
+		SELECT
+			CTGR_CD, CTGR_CD_PRT, CTGR_NM
+		FROM
+			TBL_CTGR
+		WHERE
+			CTGR_CD_PRT IS NULL
+	</select>
+
+	<select id="getSubCategoryList" parameterType="int" resultType="com.wisely.domain.CategoryVO">
+		
+		SELECT 
+			CTGR_CD, CTGR_CD_PRT, CTGR_NM
+		FROM
+			TBL_CTGR
+		WHERE
+			CTGR_CD_PRT = #{ctgr_cd}
+		
+	</select>
+	
+	<!-- 검색조건 쿼리. [제목 or 작성자] 선택. value="TW" -->
+	<!-- typeArr : 파라미터타입의 Criteria클래스의 메소드를 가리킴. 검색종류(타입)의 값을 참조하게 됨. -->
+	<sql id="criteria">
+		<!-- 접미사 > (  -->
+		<trim prefix="(" suffix=") AND " prefixOverrides="OR">
+			<foreach collection="cri.typeArr" item="type">
+				<trim prefix="OR">
+					<!-- 다중 if문 성격 choose -->
+					<choose>
+						<when test="type == 'N'.toString()">
+							PRDC_NM like '%' || #{keyword} || '%'
+						</when>
+						<when test="type == 'C'.toString()">
+							PRDC_COM like '%' || #{keyword} || '%'
+						</when>
+					</choose>
+				</trim>
+			</foreach>
+		</trim>
+	</sql>
+	
+	<!-- 1)데이터(목록) : 페이징쿼리(인덱스힌트 구문) -->
+	<!-- select문의 parameterType 이 부분은 공부차원에서 표시했음, 생략가능 -->
+	<select id="getProductListbysubCategory" parameterType="com.wisely.dto.Criteria" resultType="com.wisely.domain.ProductVO">
+		<!-- SubQuery에 선언된 컬럼만 인라인뷰 바깥쪽 select에 선언할 수 있다. (중요) -->
+		<![CDATA[
+		SELECT RN, PRDC_NUM, CTGR_CD, CTGR_CD_PRT, PRDC_NM, PRDC_PRC, PRDC_DSCT, PRDC_COM, PRDC_DTL, PRDC_IMG_FOLDER, PRDC_IMG, PRDC_AMT, PRDC_BUY, PRDC_DT_RGS, PRDC_DT_UP
+		FROM (
+		    SELECT /*+ INDEX_DESC(TBL_PRDC PRDC_NM_PK) */ ROWNUM RN, PRDC_NUM, CTGR_CD, CTGR_CD_PRT, PRDC_NM, PRDC_PRC, PRDC_DSCT, PRDC_COM, PRDC_DTL, PRDC_IMG_FOLDER, PRDC_IMG, PRDC_AMT, PRDC_BUY, PRDC_DT_RGS, PRDC_DT_UP
+		    FROM TBL_PRDC
+		    WHERE CTGR_CD = #{ctgr_cd} AND 
+	    ]]>
+	    <include refid="criteria"></include>
+	    
+	    <![CDATA[
+		    ROWNUM <= #{cri.pageNum} * #{cri.amount}
+		)
+		WHERE RN > (#{cri.pageNum}-1) * #{cri.amount}
+		]]>
+	</select>
+	
+	<!-- 2)테이블 데이터 개수 : 페이징 구현 사용 -->
+	<select id="getProductCountbysubCategory" parameterType="com.wisely.dto.Criteria" resultType="int">
+		SELECT COUNT(*) FROM TBL_PRDC WHERE CTGR_CD = #{ctgr_cd} AND
+	    
+	    <include refid="criteria"></include>
+		
+		PRDC_NUM > 0
+	</select>
+	
+	<select id="getProductByNum" parameterType="int" resultType="com.wisely.domain.ProductVO">
+		SELECT
+			PRDC_NUM, CTGR_CD, CTGR_CD_PRT, PRDC_NM, PRDC_PRC, PRDC_DSCT, PRDC_COM, PRDC_DTL, PRDC_IMG_FOLDER, PRDC_IMG, PRDC_AMT, PRDC_BUY, PRDC_DT_RGS, PRDC_DT_UP
+		FROM
+			TBL_PRDC
+		WHERE
+			PRDC_NUM = #{prdc_num}
+	</select>
+
+</mapper>

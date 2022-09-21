@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wisely.mapper.AdminMapper">
+
+	<select id="adminOk" parameterType="com.wisely.domain.AdminVO" resultType="com.wisely.domain.AdminVO">
+		SELECT 	ADM_ID, ADM_PW, ADM_NM, ADM_DT_LA
+		FROM	TBL_ADM
+		WHERE	ADM_ID = #{adm_id}
+	</select>
+
+</mapper>
